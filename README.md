@@ -19,7 +19,8 @@ A working tutorial for building a **REST API** with:
 4. [Project Structure](#project-structure)
 5. [How It Works](#how-it-works)
 6. [Development](#development)
-7. [API Usage](#api-usage)
+7. [Production Deployment](#production-deployment)
+8. [API Usage](#api-usage)
 
 ---
 
@@ -167,6 +168,62 @@ docker-compose exec db psql -U postgres -d axum_seaorm
 ```
 
 > **Pro tip:** Keep the app logs open in a terminal while coding. You'll see recompilation messages when you save changes, and any compilation errors will be displayed immediately.
+
+---
+
+## Production Deployment
+
+### 🚀 Ultra-Minimal Production Container (10MB!)
+
+This project includes an optimized production Dockerfile that creates an **extremely small and secure** container:
+
+**Key Features:**
+- **~10MB total size** (vs hundreds of MB for typical containers!)
+- **Scratch-based**: No OS, no shell, no package manager
+- **Static linking**: Self-contained binary with no runtime dependencies
+- **Maximum security**: Minimal attack surface
+- **Fast startup**: Minimal overhead
+
+### Build Production Image
+
+```bash
+# Build the production image
+docker build -t axum-seaorm:prod -f Dockerfile .
+
+# Check the image size (should be ~10MB!)
+docker images axum-seaorm:prod
+```
+
+### Run Production Container
+
+```bash
+# Start your database first
+docker-compose up -d db
+
+# Run the production container
+docker run -d \
+  --name axum-seaorm-prod \
+  --network axum-seaorm-tutorial_default \
+  -p 3000:3000 \
+  -e DATABASE_URL="postgres://postgres:postgres@axum-seaorm-db:5432/axum_seaorm" \
+  -e RUST_LOG="axum_seaorm=info,tower_http=info" \
+  axum-seaorm:prod
+```
+
+The API usage is the same as the development environment, see [API Usage](#api-usage).
+
+### Production Container Management
+
+```bash
+# View logs
+docker logs axum-seaorm-prod
+
+# Stop container
+docker stop axum-seaorm-prod
+
+# Remove container
+docker rm axum-seaorm-prod
+```
 
 ---
 

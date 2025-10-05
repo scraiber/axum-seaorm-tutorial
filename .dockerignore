@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+manual.txt
+LICENSE
+
+# Docker
+Dockerfile
+Dockerfile.dev
+.dockerignore
+docker-compose.yml
+
+# Rust
+target/
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

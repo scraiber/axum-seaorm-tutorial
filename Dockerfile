@@ -3,38 +3,31 @@ FROM rust:1.90-slim-bookworm AS builder
 
 WORKDIR /app
 
-# Install required dependencies
+# Install dependencies and musl target in single layer
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+    musl-tools \
+    && rm -rf /var/lib/apt/lists/* \
+    && rustup target add x86_64-unknown-linux-musl
 
-# Copy manifests
+# Copy manifests and source in single layer
 COPY Cargo.toml ./
-
-# Copy source code
 COPY src ./src
 
-# Build the application
-RUN cargo build --release
+# Build statically linked binary
+RUN cargo build --release --target x86_64-unknown-linux-musl
 
-# Runtime stage
-FROM debian:bookworm-slim
+# Runtime stage - minimal scratch container
+FROM scratch
 
-WORKDIR /app
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    libssl3 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy the binary from builder
-COPY --from=builder /app/target/release/axum-seaorm /app/axum-seaorm
+# Copy CA certificates and binary
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/axum-seaorm /axum-seaorm
 
 # Expose port
 EXPOSE 3000
 
 # Run the binary
-CMD ["./axum-seaorm"]
+CMD ["/axum-seaorm"]
 
