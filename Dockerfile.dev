@@ -1,0 +1,17 @@
+# Development Dockerfile with hot-reload support
+FROM rust:1.90-slim-bookworm
+
+WORKDIR /app
+
+# Install required dependencies including cargo-watch
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && cargo install cargo-watch
+
+# Expose port
+EXPOSE 3000
+
+# Use cargo-watch to watch for changes and rebuild
+CMD ["cargo", "watch", "-x", "run", "--poll", "--why"]

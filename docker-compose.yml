@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:17
+    container_name: axum-seaorm-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: axum_seaorm
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: axum-seaorm-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/axum_seaorm
+      RUST_LOG: axum_seaorm=debug,tower_http=debug
+    # Volume mounts for hot-reload (development only)
+    volumes:
+      - ./src:/app/src:ro
+      - ./Cargo.toml:/app/Cargo.toml:ro
+      - cargo_cache:/usr/local/cargo/registry
+      - target_cache:/app/target
+
+volumes:
+  postgres_data:
+  cargo_cache:
+  target_cache:
+
