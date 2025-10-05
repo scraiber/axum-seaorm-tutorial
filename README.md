@@ -9,6 +9,8 @@ A working tutorial for building a **REST API** with:
 
 > A complete, working example that you can run and modify.
 
+For a comprehensive guide with detailed explanations, code walkthroughs, and best practices, check out the full [Medium article](https://medium.com/@scraiber/building-lightning-fast-apis-with-rust-a-complete-axum-seaorm-postgresql-tutorial-5a196dab86a1).
+
 ---
 
 ## Table of Contents
